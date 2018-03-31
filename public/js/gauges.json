@@ -1,0 +1,184 @@
+{
+  "gauges":[{
+
+    "text": "cpuGauge",
+    "children":false
+    },
+    {
+
+      "text": "fGauge",
+      "children":false
+    },
+    {
+
+      "text": "tempGauge",
+      "children":false
+    },
+    {
+
+      "text": "linGauge",
+      "children":false
+    },
+    {
+
+      "text": "anotherGauge",
+      "children":false
+      }
+  ],
+
+  "cpuGauge":{
+  "geometry":{
+    "startAngle": 180,
+    "endAngle": 0
+  },
+  "scale": {
+      "startValue": 0,
+      "endValue": 100,
+      "tick": {
+          "color": "#000"
+      },
+      "minorTick": {
+          "color": "#9c9c9c",
+          "visible": true
+      },
+  "tickInterval": 10,
+  "minorTickInterval": 5,
+  "label":{
+    "font":{
+      "color":"#000"
+    }
+  }
+  },
+  "rangeContainer": {
+      "backgroundColor": "none"
+  },
+  "title": {
+      "text": "Optional",
+      "font": { "color": "#232323"  }
+  },
+  "value": 50,
+  "subvalues": [20,80],
+  "subvalueIndicator":{
+    "type": "triangleNeedle",
+    "color":"#779ECB"
+  }
+},
+
+"tempGauge": {
+  "title":{
+    "text": "Temperature",
+    "font":{"color": "#232323"}
+  },
+    "scale": {
+        "startValue": 0,
+        "endValue": 30,
+        "tickInterval": 5,
+        "label": {
+            "useRangeColors": true
+        }
+    },
+    "rangeContainer": {
+
+        "ranges": [
+            { "color":"#FFE4E1","startValue": 0, "endValue": 10 },
+            { "color":"#808080","startValue": 10, "endValue": 20 },
+            { "color":"#000","startValue": 20, "endValue": 30 }
+        ]
+    },
+
+    "value": 20,
+    "valueIndicator": {
+      "type": "textcloud",
+      "color": "#000"
+    }
+},
+
+"linGauge": {
+  "title": {
+      "text": "Humidity",
+      "font": { "color": "#232323" }
+  },
+  "scale": {
+      "startValue": 0,
+      "endValue": 100,
+      "tick": {
+          "color": "#9c9c9c"
+      },
+      "minorTick": {
+          "color": "#9c9c9c",
+          "visible": true
+      },
+  "tickInterval": 10
+
+},
+"rangeContainer": {
+  "backgroundColor": "#CACACA"
+ },
+"valueIndicator": {
+  "type": "textcloud", "color": "#000"
+},
+"value":20,
+"geometry":{
+  "orientation": "vertical"
+}
+      },
+
+  "fGauge":{
+    "scale": {
+        "startValue": 0,
+        "endValue": 1000,
+        "tick": {
+            "color": "#9c9c9c"
+        },
+        "minorTick": {
+            "color": "#9c9c9c",
+            "visible": true
+        },
+    "tickInterval": 100,
+    "minorTickInterval": 25
+    },
+    "rangeContainer": {
+        "backgroundColor": "none"
+    },
+    "title": {
+        "text": "Fan Speed (in rpm)",
+        "font": { "color": "#232323"  }
+    },
+    "value": 750
+},
+
+"anotherGauge": {
+  "title": {
+      "text": "Chart",
+      "font": { "color": "#232323"  }
+  },
+  "palette": "pastel",
+  "legend":{
+    "margin":{
+      "bottom":5,
+      "right":5,
+      "left":1,
+      "top":5
+    },
+    "paddingLeftRight":1
+
+  },
+  "dataSource": [
+         {
+             "arg": "Smth",
+             "val": 60
+         },
+         {
+             "arg": "Smth other",
+             "val": 20
+         },
+         {
+             "arg": "Smth other",
+             "val": 20
+         }
+
+     ],
+     "series": {},
+     "type":"pie"
+}
+}

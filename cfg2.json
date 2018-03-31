@@ -1,0 +1,74 @@
+{
+  "devs": [
+    {
+      "name": "office",
+      "area": {
+        "devs": [
+          {
+            "name": "HT",
+            "devtype": "HTMeter",
+            "connector": "itmp",
+            "key": "com/6",
+            "period": 2000
+          },
+          {
+            "name": "mot",
+            "devtype": "mot823",
+            "connector": "itmp",
+            "key": "com/1"
+          },
+          {
+            "name": "dev",
+            "devtype": "mot823",
+            "connector": "itmp"
+          }
+        ],
+        "hists": [
+          {
+            "varname": "HT_H",
+            "devname": "HT/H",
+            "store": true
+          },
+          {
+            "varname": "HT_T",
+            "devname": "HT/T",
+            "store": true
+          }
+        ],
+        "triggers": [
+          {
+            "triggername": "HT_H_HT_T",
+            "triggers": ["HT_H","HT_T"],
+            "source": "() => { if (HT_T < 0) alert = true; console.log(\"знач \", HT_H, HT_T); }"
+          },
+          {
+            "triggername": "HT_H",
+            "triggers": ["HT_H"],
+            "source": "() => { if (HT_H < 15) console.log(\"сухо \", HT_H); }"
+          },
+          {
+            "triggername": "HT_T",
+            "triggers": ["HT_T"],
+            "source": "() => { if (HT_T < 26) mot.setpower(0,0); else { mot.setpower(100,100); setTimeout(() => { mot.setpower(0, 0); }, 100);}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cabinet",
+      "area": {
+        "devs": [
+          {
+            "name": "dev",
+            "devtype": "mot823",
+            "connector": "itmp"
+          }
+        ],
+        "hists": [],
+        "triggers": []
+      }
+    }
+  ],
+  "hists": [],
+  "triggers": []
+}
