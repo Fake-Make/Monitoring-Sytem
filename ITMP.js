@@ -113,8 +113,13 @@ class ITMP extends EventEmitter {
       }
     }
   }
+
+  /***************************************************************************************************************************/
+  /****************************************************you need this**********************************************************/
+  /***************************************************************************************************************************/
   processResult (key, payload) {
     const t = this.transactions.get(key)
+    var str = String(payload);
     if (t !== undefined) {
       clearTimeout(t.timeout)
       this.transactions.delete(key)
@@ -122,9 +127,19 @@ class ITMP extends EventEmitter {
       const [result, properties] = payload
       t.done(result, properties)
     } else {
-      console.log('unexpected result', payload)// msg);
+      //console.log('unexpected result', payload)// msg);
+      
+      var H = str.substring(0,2) + '.' + str.substring(2,3);
+      var T = str.substring(4,6) + '.' + str.substring(6,7);
+      str = T + H;
+      console.log('T: ', T, 'H: ', H)// msg);
     }
+    return str;
   }
+  /***************************************************************************************************************************/
+  /****************************************************you need this**********************************************************/
+  /***************************************************************************************************************************/
+
   processEvent (addr, payload) {
     // console.log("event",msg);
     const [topic, args, ots] = payload
