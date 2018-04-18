@@ -2,9 +2,10 @@ const itmplink = require('./itmplink')
 const SerialPort = require('serialport')
 const crc8 = require('./crc8')
 const cbor = require('cbor')
+var sss;
 
 class ITMPSerialLink extends itmplink {
-  constructor (itmp, name, portname, props = { baudRate: 115200 }) {
+  constructor (dat, itmp, name, portname, props = { baudRate: 115200 }) {
     super(itmp, name, true)
     this.port = new SerialPort(portname, props, (err) => {
       if (err) {
@@ -33,12 +34,11 @@ class ITMPSerialLink extends itmplink {
       console.log('Error: ', err.message)
     })
     this.port.on('data', (data) => {
-      this.income(data)
+      this.income(data, dat)
     })
     this.port.on('open', () => {
       // open logic
       this.ready = true // port opened flag
-      console.log('open')
     })
     this.reopen = (that) => {
       if (!that.port.isOpen) {
@@ -67,38 +67,7 @@ class ITMPSerialLink extends itmplink {
     })
   }
 
-  subscribe (subaddr, suburi, opts, done) {
-    //    const that = this;
-    const sub = setInterval(() => {
-      const that2 = this
-      this.itmp.call(`${this.linkname}/${subaddr}`, suburi, null, (data, ropts) => {
-        const url = `${that2.linkname}/${subaddr}/${suburi}`
-        // if ()
-        that2.itmp.emitEvent(url, data, ropts)
-      })
-    }, 1000)
-    this.polls.set(`${subaddr}/${suburi}`, sub)
-    done()
-  }
-
-  unsubscribe (subaddr, suburi, opts, done, err) {
-    const timer = this.polls.get(`${subaddr}/${suburi}`)
-    if (timer) {
-      clearInterval(timer)
-      done()
-    } else {
-      err()
-    }
-  }
-
-  call (subaddr, suburi) {
-    if (suburi === '') {
-      return this.ports
-    }
-    return null
-  }
-
-  income (data) {
+  income (data, dat) {
     for (let i = 0; i < data.length; i++) {
       if (this.lastchar === 0x7d) {
         this.inbuf[this.inpos] = data[i] ^ 0x20
@@ -114,6 +83,9 @@ class ITMPSerialLink extends itmplink {
           if (typeof this.itmp.process === 'function') {
             const msg = cbor.decode(this.inbuf.slice(1, this.inpos - 1))
             this.itmp.process(this, `${this.linkname}/${addr}`, msg)
+            var str = String(msg);
+            dat.H = str.substring(4,6) + '.' + str.substring(6,7);
+            dat.T = str.substring(8,10) + '.' + str.substring(10,11);
           }
 
           this.nexttransaction()
@@ -149,16 +121,8 @@ class ITMPSerialLink extends itmplink {
     }
   }
 
-  timeisout () {
-    if (typeof this.cur_err === 'function') {
-      this.cur_err('timeout')
-    }
-    this.nexttransaction()
-  }
-
-  send (addr, msg) {
+  send (addr, msg, dat) {
     const binmsg = cbor.encode(msg)
-
     if (this.busy) {
       this.msgqueue.push([addr, binmsg])
     } else {
@@ -167,11 +131,11 @@ class ITMPSerialLink extends itmplink {
       this.timerId = setTimeout(() => {
         this.timeisout()
       }, 100)
-      this.internalsend(addr, binmsg)
+      this.internalsend(addr, binmsg, dat)
     }
   }
 
-  internalsend (addr, binmsg) {
+  internalsend (addr, binmsg, dat) {
     if (this.cur_buf.length < binmsg.length * 2) {
       this.cur_buf = Buffer.allocUnsafe(binmsg.length * 2)
     }
@@ -204,19 +168,7 @@ class ITMPSerialLink extends itmplink {
 
     this.cur_buf[pos] = 0x7e
     const sndbuf = this.cur_buf.slice(0, pos + 1)
-
-    this.port.write(sndbuf, (errdt) => {
-      if (errdt) {
-        console.log('Error on write: ', errdt.message)
-      }
-
-      // console.log('message written');
-    })
-    //    var timerId = setTimeout( (key)=>{ var prom = that.transactions.get(key);
-    // that.transactions.delete(key); prom.err("timeout"); }, 2000, key);
-  }
-  queueSize () {
-    return this.msgqueue.length
+    this.port.write(sndbuf);
   }
 }
 
