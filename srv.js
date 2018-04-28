@@ -9,6 +9,19 @@ SerialPort.list((err, ports) => {
 })
 */
 
+var mongoClient = require("mongodb").MongoClient;
+var url="mongodb://localhost:27017/systDB"; //url бд
+// добавление в бд
+setInterval(function() {        //добавить запись каждые 5с
+    mongoClient.connect(url, function(err, db){   //подключаемся к бд
+    var collection = db.collection("readings");   //подключаемся к коллекции
+    collection.insertOne({date: new Date(), Humidity: 50, Temperature: 20}, function(err, result){
+        if(err) {return console.log(err);}
+        console.log(result.ops);
+    });
+  });
+  }, 5000);
+
 // Брутфорсный запуск сервера
 const express = require('express')
 const app = express()
