@@ -4,6 +4,7 @@ class ITMP extends EventEmitter {
   constructor (portname, props) {
     super()
     this.links = new Map()
+    this.tr = new Map()
   }
 
   addLink (lnk) {
@@ -14,16 +15,21 @@ class ITMP extends EventEmitter {
   let [command, ...payload] = msg
   let id
   [id, ...payload] = payload
+
+  let t = this.tr.get(addr)
+  if (t && typeof t.done === 'function')
+    t.done(payload)
 }
 
-  transaction (addr, msg, dat, done, err) {
+  transaction (addr, msg, done, err) {
     const [linkname, subaddr = ''] = addr.split('/', 2)
     const link = this.links.get(linkname)
-    link.send(subaddr, msg, dat, done, err);
+    link.send(subaddr, msg, done, err);
+    this.tr.set(addr,{done,err})
   }
 
-  call (addr, name, dat, param, done, err) {
-    return this.transaction(addr, [8, 0, name, [param]], dat, done, err)
+  call (addr, name, param, done, err) {
+    return this.transaction(addr, [8, 0, name, [param]], done, err)
   }
 
   addCall (name, func) {

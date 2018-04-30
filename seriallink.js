@@ -5,7 +5,7 @@ const cbor = require('cbor')
 var sss;
 
 class ITMPSerialLink extends itmplink {
-  constructor (dat, itmp, name, portname, props = { baudRate: 115200 }) {
+  constructor (itmp, name, portname, props = { baudRate: 115200 }) {
     super(itmp, name, true)
     this.port = new SerialPort(portname, props, (err) => {
       if (err) {
@@ -34,7 +34,7 @@ class ITMPSerialLink extends itmplink {
       console.log('Error: ', err.message)
     })
     this.port.on('data', (data) => {
-      this.income(data, dat)
+      this.income(data)
     })
     this.port.on('open', () => {
       // open logic
@@ -67,7 +67,7 @@ class ITMPSerialLink extends itmplink {
     })
   }
 
-  income (data, dat) {
+  income (data) {
     for (let i = 0; i < data.length; i++) {
       if (this.lastchar === 0x7d) {
         this.inbuf[this.inpos] = data[i] ^ 0x20
@@ -79,15 +79,11 @@ class ITMPSerialLink extends itmplink {
       } else if (data[i] === 0x7e) {
         if (this.inpos > 2 && this.incrc === 0 /* this.inbuf[this.inpos-1] */) {
           const addr = this.inbuf[0]
-
           if (typeof this.itmp.process === 'function') {
             const msg = cbor.decode(this.inbuf.slice(1, this.inpos - 1))
             this.itmp.process(this, `${this.linkname}/${addr}`, msg)
             var str = String(msg);
-            dat.H = str.substring(4,6) + '.' + str.substring(6,7);
-            dat.T = str.substring(8,10) + '.' + str.substring(10,11);
-          }
-
+          } 
           this.nexttransaction()
         }
         this.lastchar = 0
@@ -106,9 +102,9 @@ class ITMPSerialLink extends itmplink {
       const [addr, msg] = this.msgqueue.shift()
       this.cur_addr = addr
       clearTimeout(this.timerId)
-      this.timerId = setTimeout(() => {
-        this.timeisout()
-      }, 200)
+//      this.timerId = setTimeout(() => {
+//        this.timeisout()
+//      }, 200)
       this.internalsend(addr, msg)
     } else {
       this.cur_addr = 0
@@ -121,21 +117,21 @@ class ITMPSerialLink extends itmplink {
     }
   }
 
-  send (addr, msg, dat) {
+  send (addr, msg) {
     const binmsg = cbor.encode(msg)
     if (this.busy) {
       this.msgqueue.push([addr, binmsg])
     } else {
       this.busy = true
       this.cur_addr = addr
-      this.timerId = setTimeout(() => {
-        this.timeisout()
-      }, 100)
-      this.internalsend(addr, binmsg, dat)
+//      this.timerId = setTimeout(() => {
+ //       this.timeisout()
+  //    }, 100)
+      this.internalsend(addr, binmsg)
     }
   }
 
-  internalsend (addr, binmsg, dat) {
+  internalsend (addr, binmsg) {
     if (this.cur_buf.length < binmsg.length * 2) {
       this.cur_buf = Buffer.allocUnsafe(binmsg.length * 2)
     }
