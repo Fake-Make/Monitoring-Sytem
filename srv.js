@@ -39,7 +39,7 @@ SerialPort.list((err, ports) => {
   })
 
   var mongoClient = require("mongodb").MongoClient;
-  var url="mongodb://localhost:27017/systDB"; //url бд
+  var url="mongodb://common:1234rewq@ds111420.mlab.com:11420/systdb"; //url бд
   // добавление в бд
   setInterval(function() {        //добавить запись каждые 5с
       mongoClient.connect(url, function(err, db){   //подключаемся к бд
