@@ -24,11 +24,24 @@ SerialPort.list((err, ports) => {
   itmp.addLink(new ITMPSerialLink(itmp, 'com', com))
   var dat = new Object();
   dat.H = ''; dat.T = '';
+  
+  //модуль для отправки сообщений
+  var nodemailer = require('nodemailer');
+  
+  var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: 'svtgrishaeva@gmail.com',
+      pass: '46gilazo'
+    }
+  });
+  
+  //флаг "превышено"
+  var exceeded = false;
+  
   // Обработчик запроса для страницы
   app.get('/request', jsonParser, function(req, res) {
-
     var data = new Object();
-
     itmp.call("com/47", "get",undefined,(dat)=>{
       data.hum = (dat[0][0]/10).toFixed(1);
       data.tem = (dat[0][1]/10).toFixed(1);
@@ -36,6 +49,38 @@ SerialPort.list((err, ports) => {
       res.send(data);
       res.end();
     });
+    
+    if ((data.hum > 65 || data.hum < 45 || data.tem > 65 || data.tem < 35) && !exceeded)
+    {
+      exceeded = true;
+	    transporter.sendMail({
+		    from: 'svtgrishaeva@gmail.com',
+		    to: 'sveta.grishaeva.2018@gmail.com',
+		    subject: 'Показатели датчика вышли за диапозон допустимых значений!',
+		    text: 'Влажность: ' + data.hum + ', температура: ' + data.tem},
+		    function(error, info)
+		    {
+			    if (error) { console.log(error); } 
+			    else { console.log('Email sent: ' + info.response); }
+		    }
+	      );
+    }
+	  else 
+		  if ((data.hum <= 65 || data.hum >= 45 || data.tem <= 65 || data.tem >= 35) && exceeded)
+		  {
+			    exceeded = false;
+			    ransporter.sendMail({
+			    from: 'svtgrishaeva@gmail.com',
+			    to: 'sveta.grishaeva.2018@gmail.com',
+			    subject: 'Показатели датчика пришли в норму.',
+			    text: 'Влажность: ' + data.hum + ', температура: ' + data.tem},
+			    function(error, info)
+			    {	
+				    if (error) { console.log(error); } 
+				    else { console.log('Email sent: ' + info.response); }
+			    }
+			    );
+		   }
   })
 
   var mongoClient = require("mongodb").MongoClient;
